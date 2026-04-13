@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Val d'Aran Ultra Trail — Training Tracker</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #181b24;
+  --bg3: #1e2230;
+  --text: #e2e4ea;
+  --text-muted: #8890a4;
+  --accent: #6c5ce7;
+  --green: #00b894;
+  --orange: #fdcb6e;
+  --blue: #74b9ff;
+  --purple: #a29bfe;
+  --gray: #636e83;
+  --red: #fd79a8;
+  --border: #2d3143;
+  --complete-bg: rgba(0,184,148,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cpath d='M0 200 Q50 180 100 200 T200 200 T300 200 T400 200' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.04'/%3E%3Cpath d='M0 220 Q60 200 120 220 T240 220 T360 220 T400 215' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.035'/%3E%3Cpath d='M0 240 Q70 225 140 240 T280 240 T400 235' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.03'/%3E%3Cpath d='M0 160 Q45 140 90 160 T180 160 T270 160 T360 160 T400 158' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.035'/%3E%3Cpath d='M0 140 Q55 125 110 140 T220 140 T330 140 T400 138' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.03'/%3E%3Cpath d='M0 180 Q40 165 80 180 T160 180 T240 180 T320 180 T400 178' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.04'/%3E%3Cpath d='M0 260 Q80 245 160 260 T320 260 T400 255' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.025'/%3E%3Cpath d='M0 120 Q50 108 100 120 T200 120 T300 120 T400 118' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.025'/%3E%3Cpath d='M0 280 Q90 268 180 280 T360 280 T400 276' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.02'/%3E%3Cpath d='M0 100 Q45 90 90 100 T180 100 T270 100 T360 100 T400 98' fill='none' stroke='%23a29bfe' stroke-width='0.5' opacity='0.02'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 400px 400px;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.hero {
+  text-align: center;
+  padding: 40px 16px 24px;
+  padding-bottom: 120px;
+  background: linear-gradient(180deg, #0f1117 0%, #1a1040 40%, #2d1b69 100%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.mountain-svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at 50% 80%, rgba(108,92,231,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero h1 {
+  font-size: 2rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #a29bfe, #fd79a8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 1;
+}
+.hero .subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
+  letter-spacing: 2px;
+  position: relative;
+  z-index: 1;
+}
+.countdown {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.countdown-unit {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  min-width: 72px;
+  text-align: center;
+}
+.countdown-unit .num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.countdown-unit .label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Overall progress */
+.overall-progress {
+  margin: 20px auto;
+  max-width: 960px;
+  padding: 0 16px;
+}
+.overall-progress .bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--bg3);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--accent));
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}
+
+/* Phases */
+.phase {
+  margin-top: 32px;
+}
+.phase-header {
+  padding: 12px 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.phase-header h2 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+.phase-header .dates {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Weeks */
+.week {
+  border: 1px solid var(--border);
+  border-top: none;
+  background: var(--bg2);
+  margin-bottom: 2px;
+}
+.week:last-child { border-radius: 0 0 8px 8px; }
+.week.current-week { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 20px rgba(108,92,231,0.15); }
+.week.current-week .week-header { background: rgba(108,92,231,0.1); }
+
+.week-header {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.week-header:hover { background: var(--bg3); }
+.week-header .week-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.week-header .week-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.week-progress-mini {
+  width: 100px;
+  height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.week-progress-mini .fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.week-summary-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.week-summary-stats span { white-space: nowrap; }
+
+.current-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.week-body { display: none; }
+.week.open .week-body { display: block; }
+
+.week-complete-msg {
+  text-align: center;
+  padding: 10px;
+  background: rgba(0,184,148,0.1);
+  color: var(--green);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: none;
+}
+.week-complete-msg.visible { display: block; }
+
+/* Sessions */
+.session {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: start;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(45,49,67,0.5);
+  transition: background 0.2s, opacity 0.3s;
+  font-size: 0.8rem;
+}
+.session:last-child { border-bottom: none; }
+.session.completed {
+  background: var(--complete-bg);
+}
+.session.completed .session-info { opacity: 0.5; text-decoration: line-through; text-decoration-color: var(--text-muted); }
+
+.session-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+}
+.session-check input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  background: transparent;
+}
+.session-check input[type="checkbox"]:hover {
+  border-color: var(--green);
+}
+.session-check input[type="checkbox"]:checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.session-check input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px; top: 1px;
+  width: 6px; height: 11px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkPop 0.3s ease;
+}
+@keyframes checkPop {
+  0% { transform: rotate(45deg) scale(0); }
+  50% { transform: rotate(45deg) scale(1.3); }
+  100% { transform: rotate(45deg) scale(1); }
+}
+.session.rest-day .session-check { visibility: hidden; }
+
+.session-info {
+  display: grid;
+  grid-template-columns: 120px 90px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+@media (max-width: 640px) {
+  .session-info {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+.session-date { color: var(--text-muted); font-size: 0.75rem; }
+.session-time { color: var(--text-muted); font-size: 0.7rem; }
+.session-name { font-weight: 600; }
+.session-details {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  padding-left: 0;
+  margin-top: 2px;
+}
+
+/* Color coding */
+.type-easy .session-name { color: var(--green); }
+.type-track .session-name { color: var(--orange); }
+.type-gym .session-name { color: var(--blue); }
+.type-long .session-name { color: var(--purple); }
+.type-rest .session-name { color: var(--gray); }
+.type-yoga .session-name { color: var(--green); }
+.type-back-to-back .session-name { color: var(--purple); }
+.type-ardennes .session-name { color: var(--purple); }
+
+.type-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.type-easy .type-indicator { background: var(--green); }
+.type-track .type-indicator { background: var(--orange); }
+.type-gym .type-indicator { background: var(--blue); }
+.type-long .type-indicator { background: var(--purple); }
+.type-rest .type-indicator { background: var(--gray); }
+.type-yoga .type-indicator { background: var(--green); }
+.type-back-to-back .type-indicator { background: var(--purple); }
+.type-ardennes .type-indicator { background: var(--purple); }
+
+/* Race day */
+.race-day-card {
+  margin: 32px auto;
+  max-width: 960px;
+  padding: 0 16px;
+}
+.race-day-card .inner {
+  background: linear-gradient(135deg, #1a1040, #2d1b69);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.race-day-card .inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(162,155,254,0.1), transparent 70%);
+}
+.race-day-card h3 {
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--purple);
+  position: relative;
+}
+.race-day-card .race-date {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  position: relative;
+}
+.race-day-card .race-stats {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--red);
+  position: relative;
+  letter-spacing: 1px;
+}
+
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  animation: confettiFall 1.2s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateY(120px) rotate(720deg) scale(0.3); }
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  justify-content: center;
+  margin: 16px auto;
+  max-width: 960px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Val d'Aran</h1>
+  <div class="subtitle">Ultra Trail / 5000m D+ / July 1, 2026</div>
+  <div class="countdown" id="countdown"></div>
+  <svg class="mountain-svg" viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Back layer - distant peaks, lightest -->
+    <path d="M0 280 L60 220 L120 250 L180 180 L240 230 L320 140 L380 200 L440 160 L520 100 L580 170 L640 120 L720 80 L780 150 L840 110 L920 60 L980 130 L1040 90 L1100 150 L1160 110 L1240 70 L1300 140 L1360 100 L1440 160 L1440 320 L0 320 Z"
+          fill="#6c5ce7" opacity="0.15"/>
+    <!-- Second layer -->
+    <path d="M0 290 L80 230 L140 260 L220 180 L300 220 L360 170 L440 210 L500 150 L580 190 L660 130 L720 180 L800 110 L860 170 L940 120 L1000 160 L1080 130 L1140 180 L1220 140 L1300 170 L1380 150 L1440 190 L1440 320 L0 320 Z"
+          fill="#4834d4" opacity="0.2"/>
+    <!-- Third layer - mid mountains -->
+    <path d="M0 300 L100 240 L180 270 L260 210 L340 250 L420 200 L520 240 L600 180 L680 220 L760 170 L840 210 L920 180 L1000 220 L1080 190 L1160 220 L1240 200 L1320 230 L1440 210 L1440 320 L0 320 Z"
+          fill="#2d1b69" opacity="0.4"/>
+    <!-- Front layer - nearest foothills -->
+    <path d="M0 305 L120 260 L240 280 L340 250 L460 275 L560 245 L680 270 L780 250 L900 270 L1000 255 L1100 272 L1200 258 L1320 270 L1440 260 L1440 320 L0 320 Z"
+          fill="#1a1040" opacity="0.7"/>
+    <!-- Foreground ridge - blends into page bg -->
+    <path d="M0 312 L200 285 L400 295 L600 282 L800 292 L1000 280 L1200 290 L1440 284 L1440 320 L0 320 Z"
+          fill="#0f1117" opacity="1"/>
+  </svg>
+</div>
+
+<div class="overall-progress">
+  <div class="bar-label">
+    <span>Overall Progress</span>
+    <span id="overall-label">0 / 0 sessions</span>
+  </div>
+  <div class="progress-bar"><div class="fill" id="overall-fill" style="width:0%"></div></div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Easy / Yoga</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Track</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Gym / Strength</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Long / B2B / Ardennes</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gray)"></div>Rest / Blocked</div>
+</div>
+
+<div class="container" id="app"></div>
+
+<div class="race-day-card">
+  <div class="inner">
+    <h3>Race Day</h3>
+    <div class="race-date">Wednesday, July 1, 2026</div>
+    <div class="race-stats">Mountain Ultra Trail / 5000m D+</div>
+  </div>
+</div>
+
+<div class="footer">Val d'Aran Ultra Trail Training Tracker / Built with grit</div>
+
+<div class="confetti-container" id="confetti"></div>
+
+<script>
+const RACE_DATE = new Date('2026-07-01T06:00:00');
+const TODAY = new Date();
+
+// ── Data ──
+const phases = [
+  {
+    name: 'Phase 1: Specific Preparation',
+    dates: 'Weeks 1-3 / Apr 13 - May 3',
+    weeks: [
+      {
+        num: 1, title: 'Week 1: Apr 13-19', target: '70km / 1000m D+ / ~8h',
+        startDate: '2026-04-13', endDate: '2026-04-19',
+        sessions: [
+          { date: 'Mon Apr 13', time: '11:45-13:00', name: 'Lunch run', details: '10km easy -- already blocked', type: 'easy' },
+          { date: 'Tue Apr 14', time: '12:00-13:30', name: 'Run with Lena', details: 'Keep easy pace, 10-12km', type: 'easy' },
+          { date: 'Tue Apr 14', time: '17:30-19:00', name: 'Gym: Strength A + treadmill', details: '40min strength (squats, split squats, eccentric step-downs, RDL, calf raises) + 20min treadmill 15% moderate', type: 'gym' },
+          { date: 'Wed Apr 15', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team. Good VO2max stimulus.', type: 'track' },
+          { date: 'Thu Apr 16', time: '', name: 'REST', details: 'Recovery day', type: 'rest' },
+          { date: 'Fri Apr 17', time: '12:00-13:00', name: 'Lunch run', details: '8km easy', type: 'easy' },
+          { date: 'Fri Apr 17', time: '17:30-19:00', name: 'Gym: Strength B + treadmill', details: '30min strength (lunges, step-ups, core) + 30min treadmill 15% incline power hike', type: 'gym' },
+          { date: 'Sat Apr 18', time: '09:00-11:15', name: 'Long run -- vert focus', details: '2h15, include 45min treadmill incline or parking garage repeats', type: 'long' },
+          { date: 'Sun Apr 19', time: '09:00-10:00', name: 'Easy run', details: '60min recovery pace, flat', type: 'easy' }
+        ]
+      },
+      {
+        num: 2, title: 'Week 2: Apr 20-26', target: '75km / 1200m D+ / ~9h',
+        startDate: '2026-04-20', endDate: '2026-04-26',
+        sessions: [
+          { date: 'Mon Apr 20', time: '17:00-18:00', name: 'Easy run', details: '10km, evening', type: 'easy' },
+          { date: 'Tue Apr 21', time: '16:30-18:15', name: 'Gym: Strength A + treadmill incline', details: '40min strength + 30min treadmill at 12-15% moderate-hard effort', type: 'gym' },
+          { date: 'Wed Apr 22', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
+          { date: 'Thu Apr 23', time: '12:15-13:00', name: 'Yoga', details: 'Active recovery', type: 'yoga' },
+          { date: 'Thu Apr 23', time: '', name: 'REST from running', details: 'Karaoke evening', type: 'rest' },
+          { date: 'Fri Apr 24', time: '09:30-12:00', name: 'Big training day (Day off)', details: 'Uphill treadmill intervals (6x8min at 15%) + Strength B + stairmaster cooldown', type: 'gym' },
+          { date: 'Sat Apr 25', time: '09:00-11:30', name: 'Long run -- vert focus', details: '2h30, include 60min incline work', type: 'long' },
+          { date: 'Sun Apr 26', time: '09:00-10:00', name: 'Easy run', details: '60min recovery', type: 'easy' }
+        ]
+      },
+      {
+        num: 3, title: 'Week 3: Apr 27 - May 3', target: '80km / 1400m D+ / ~9.5h',
+        startDate: '2026-04-27', endDate: '2026-05-03',
+        sessions: [
+          { date: 'Mon Apr 27', time: '11:00-12:00', name: 'Lunch run', details: '10km easy (wide open 11:00-13:00)', type: 'easy' },
+          { date: 'Tue Apr 28', time: '17:30-19:00', name: 'Gym: Strength A + treadmill', details: '40min strength (eccentric emphasis: slow step-downs, tempo squats) + 25min treadmill 15%', type: 'gym' },
+          { date: 'Wed Apr 29', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
+          { date: 'Thu Apr 30', time: '11:00-12:30', name: 'Midday run + stairmaster', details: '40min easy run + 30min stairmaster (big open window 11:00-16:00)', type: 'easy' },
+          { date: 'Fri May 1', time: '09:00-12:00', name: 'Big vert session (Holiday)', details: 'Uphill intervals (5x8min at 15%, practice power-hiking) + Strength B + stairmaster', type: 'gym' },
+          { date: 'Sat May 2', time: '09:00-11:45', name: 'Long run', details: '2h45, include 70min sustained incline block', type: 'long' },
+          { date: 'Sun May 3', time: '09:00-10:10', name: 'Easy run or bike', details: '70min recovery', type: 'easy' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Phase 2: Peak / Race-Specific',
+    dates: 'Weeks 4-7 / May 4 - May 31',
+    weeks: [
+      {
+        num: 4, title: 'Week 4: May 4-10', target: '80km / 1500m D+ / ~10h',
+        startDate: '2026-05-04', endDate: '2026-05-10',
+        sessions: [
+          { date: 'Mon May 4', time: '17:00-18:15', name: 'Easy run + strides', details: '10km with 6x20sec strides', type: 'easy' },
+          { date: 'Tue May 5', time: '10:00-12:00', name: 'Gym: Strength A + uphill treadmill', details: 'Very light work day! 40min strength + 40min treadmill at 12-15% sustained', type: 'gym' },
+          { date: 'Wed May 6', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
+          { date: 'Thu May 7', time: '12:00-13:00', name: 'Lunch run + downhill repeats', details: '8km easy + 15x stair descent repeats (eccentric quad loading)', type: 'easy' },
+          { date: 'Fri May 8', time: '09:00-12:30', name: 'Big training day (Day off)', details: 'Long uphill treadmill (sustained 60min at 12-15%) + Strength B + stairmaster', type: 'gym' },
+          { date: 'Sat May 9', time: '08:30-11:30', name: 'Long run -- vert focus', details: '3h, sustained vert: treadmill + outdoor combo', type: 'long' },
+          { date: 'Sun May 10', time: '09:00-10:15', name: 'Back-to-back: easy run', details: '75min on tired legs. Key adaptation!', type: 'back-to-back' }
+        ]
+      },
+      {
+        num: 5, title: 'Week 5: May 11-17', target: '85km / 1800m D+ / ~11h',
+        startDate: '2026-05-11', endDate: '2026-05-17',
+        sessions: [
+          { date: 'Mon May 11', time: '17:00-18:15', name: 'Easy run', details: '10km evening', type: 'easy' },
+          { date: 'Tue May 12', time: '17:00-18:30', name: 'Gym: Strength A (maintenance) + treadmill', details: '30min strength (lower volume, maintain intensity) + 35min treadmill incline sustained', type: 'gym' },
+          { date: 'Wed May 13', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
+          { date: 'Thu May 14', time: '10:00-11:30', name: 'Midday: stairmaster + easy run', details: 'Very light day! 35min stairmaster + 30min easy run', type: 'easy' },
+          { date: 'Fri May 15', time: '12:00-13:00', name: 'Lunch run', details: '8km easy (working Friday)', type: 'easy' },
+          { date: 'Fri May 15', time: '17:30-18:30', name: 'Gym: Strength B + treadmill', details: '25min strength + 30min treadmill incline', type: 'gym' },
+          { date: 'Sat May 16', time: '08:00-11:30', name: 'Ardennes weekend day 1', details: 'Drive to Spa/Houffalize. 3h-3h30 trail, target 800-1000m D+. Practice race nutrition!', type: 'ardennes' },
+          { date: 'Sun May 17', time: '08:30-10:30', name: 'Ardennes weekend day 2', details: '2h easy trail, 400-600m D+. Back-to-back on real terrain.', type: 'ardennes' }
+        ]
+      },
+      {
+        num: 6, title: 'Week 6: May 18-24', target: '85km / 1800m D+ / ~11h',
+        startDate: '2026-05-18', endDate: '2026-05-24',
+        sessions: [
+          { date: 'Mon May 18', time: '13:30-14:30', name: 'Afternoon run', details: '10km easy (light afternoon)', type: 'easy' },
+          { date: 'Tue May 19', time: '', name: 'BLOCKED: Opleidingsdag BECOM', details: 'REST or easy evening walk only', type: 'rest' },
+          { date: 'Wed May 20', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team. Only hard session this week mid-week (Tue lost to BECOM).', type: 'track' },
+          { date: 'Thu May 21', time: '12:15-13:00', name: 'Yoga', details: 'Active recovery', type: 'yoga' },
+          { date: 'Thu May 21', time: '17:30-18:30', name: 'Easy run or bike', details: '45-60min recovery', type: 'easy' },
+          { date: 'Fri May 22', time: '09:00-12:30', name: 'Big training day (Day off)', details: 'Strength A (maintenance) + long treadmill vert (70min sustained at 12-15%) + downhill stair repeats', type: 'gym' },
+          { date: 'Sat May 23', time: '08:30-11:45', name: 'Long run -- biggest one', details: '3h15, include 80min+ vert work', type: 'long' },
+          { date: 'Sun May 24', time: '09:00-10:15', name: 'Back-to-back easy', details: '75min recovery', type: 'back-to-back' }
+        ]
+      },
+      {
+        num: 7, title: 'Week 7: May 25-31 (PEAK)', target: '90km / 2000m D+ / ~12h',
+        startDate: '2026-05-25', endDate: '2026-05-31',
+        sessions: [
+          { date: 'Mon May 25', time: '13:30-14:30', name: 'Afternoon easy run', details: '10km (light afternoon)', type: 'easy' },
+          { date: 'Tue May 26', time: '17:00-18:30', name: 'Gym: Strength (light) + treadmill', details: '25min bodyweight/light strength + 40min treadmill: sustained at 12-15%', type: 'gym' },
+          { date: 'Wed May 27', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
+          { date: 'Thu May 28', time: '11:00-12:30', name: 'Midday stairmaster + easy run', details: '40min stairmaster + 30min easy (free 11:00-16:00, busy evening)', type: 'easy' },
+          { date: 'Fri May 29', time: '12:00-13:00', name: 'Lunch run', details: '8km easy (working Friday)', type: 'easy' },
+          { date: 'Fri May 29', time: '17:30-18:30', name: 'Easy run or bike', details: '45-60min, keep it light before big weekend', type: 'easy' },
+          { date: 'Sat May 30', time: '07:30-11:00', name: 'Ardennes/Alps day 1', details: '3h30, target 1000-1200m D+. Practice nutrition + gear. Dress rehearsal!', type: 'ardennes' },
+          { date: 'Sun May 31', time: '08:30-10:30', name: 'Back-to-back day 2', details: '2h trail, 500-700m D+', type: 'back-to-back' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Phase 3: Taper',
+    dates: 'Weeks 8-9 / Jun 1 - Jun 14',
+    weeks: [
+      {
+        num: 8, title: 'Week 8: Jun 1-7', target: '65km / 1200m D+ / ~8h',
+        startDate: '2026-06-01', endDate: '2026-06-07',
+        sessions: [
+          { date: 'Mon Jun 1', time: '17:00-18:00', name: 'Easy run', details: '8km, start winding down', type: 'easy' },
+          { date: 'Tue Jun 2', time: '10:00-11:30', name: 'Gym: treadmill intervals + light strength', details: 'Very light work day! 4x6min at race effort + 20min bodyweight strength', type: 'gym' },
+          { date: 'Wed Jun 3', time: '18:30-20:00', name: 'Track session (lighter)', details: 'Join the group but dial back intensity. Shorter reps, longer recovery.', type: 'track' },
+          { date: 'Thu Jun 4', time: '12:00-13:00', name: 'Lunch run', details: '8km easy', type: 'easy' },
+          { date: 'Fri Jun 5', time: '09:30-11:00', name: 'Gym: bodyweight strength + stairmaster (Day off)', details: '30min activation/mobility + 30min stairmaster moderate', type: 'gym' },
+          { date: 'Sat Jun 6', time: '09:00-11:00', name: 'Long run (reduced)', details: '2h, include 40min vert work', type: 'long' },
+          { date: 'Sun Jun 7', time: '09:00-09:50', name: 'Easy run', details: '50min flat, recovery', type: 'easy' }
+        ]
+      },
+      {
+        num: 9, title: 'Week 9: Jun 8-14', target: '55km / 800m D+ / ~6.5h',
+        startDate: '2026-06-08', endDate: '2026-06-14',
+        sessions: [
+          { date: 'Mon Jun 8', time: '', name: 'REST', details: '', type: 'rest' },
+          { date: 'Tue Jun 9', time: '17:00-18:00', name: 'Gym: treadmill intervals (short & sharp)', details: '4x4min at 15% -- keep legs responsive', type: 'gym' },
+          { date: 'Wed Jun 10', time: '18:30-20:00', name: 'Track session (moderate)', details: 'Join the group, keep effort controlled. Last proper track session.', type: 'track' },
+          { date: 'Thu Jun 11', time: '', name: 'REST', details: 'Podcast block 11:00-14:30, busy day', type: 'rest' },
+          { date: 'Fri Jun 12', time: '12:00-13:00', name: 'Lunch run', details: '6km easy + 4 strides (working Friday)', type: 'easy' },
+          { date: 'Fri Jun 12', time: '17:30-18:15', name: 'Gym: bodyweight strength', details: '25min activation only', type: 'gym' },
+          { date: 'Sat Jun 13', time: '09:00-10:30', name: 'Moderate run with vert', details: '90min, last meaningful session. Include 30min treadmill incline.', type: 'long' },
+          { date: 'Sun Jun 14', time: '09:00-09:40', name: 'Easy run', details: '40min, flat', type: 'easy' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Phase 4: Sharpening',
+    dates: 'Weeks 10-11 / Jun 15 - Jun 28',
+    weeks: [
+      {
+        num: 10, title: 'Week 10: Jun 15-21', target: '40km / 400m D+ / ~5h',
+        startDate: '2026-06-15', endDate: '2026-06-21',
+        sessions: [
+          { date: 'Mon Jun 15', time: '', name: 'REST', details: '', type: 'rest' },
+          { date: 'Tue Jun 16', time: '11:00-11:40', name: 'Easy run + strides', details: '35min easy + 4x20sec strides (light day, free after 11:00)', type: 'easy' },
+          { date: 'Wed Jun 17', time: '18:30-20:00', name: 'Track session (easy)', details: 'Join the group for warmup + a few short reps. Social, not hard.', type: 'track' },
+          { date: 'Thu Jun 18', time: '12:15-13:00', name: 'Yoga', details: 'Mobility session', type: 'yoga' },
+          { date: 'Fri Jun 19', time: '09:30-10:30', name: 'Easy run + 15min treadmill (Day off)', details: 'Reminder for the legs. Short and sweet.', type: 'easy' },
+          { date: 'Sat Jun 20', time: '09:00-09:30', name: 'Easy 30min', details: 'Shakeout', type: 'easy' },
+          { date: 'Sun Jun 21', time: '', name: 'REST', details: '', type: 'rest' }
+        ]
+      },
+      {
+        num: 11, title: 'Week 11: Jun 22-28', target: '25km / ~3h total',
+        startDate: '2026-06-22', endDate: '2026-06-28',
+        sessions: [
+          { date: 'Mon Jun 22', time: '13:30-13:55', name: 'Easy 25min + strides', details: 'Light shakeout (free afternoon)', type: 'easy' },
+          { date: 'Tue Jun 23', time: '', name: 'REST', details: '', type: 'rest' },
+          { date: 'Wed Jun 24', time: '18:30-19:30', name: 'Track session (very easy / skip)', details: 'Optional: join for warmup and a few strides only. Or skip entirely.', type: 'track' },
+          { date: 'Thu Jun 25', time: '', name: 'REST', details: 'Kind Kids event evening', type: 'rest' },
+          { date: 'Fri Jun 26', time: '', name: 'REST', details: 'YOUCA event evening', type: 'rest' },
+          { date: 'Sat Jun 27', time: '09:00-09:15', name: '15min easy + 4 strides', details: 'Final activation', type: 'easy' },
+          { date: 'Sun Jun 28', time: '', name: 'REST', details: 'Travel / rest', type: 'rest' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Race Week',
+    dates: 'Jun 29 - Jul 1',
+    weeks: [
+      {
+        num: 12, title: 'Race Week: Jun 29 - Jul 1', target: '',
+        startDate: '2026-06-29', endDate: '2026-07-01',
+        sessions: [
+          { date: 'Mon Jun 29', time: '', name: 'Rest / travel prep', details: '', type: 'rest' },
+          { date: 'Tue Jun 30', time: '', name: 'Rest / travel', details: '', type: 'rest' },
+          { date: 'Wed Jul 1', time: '', name: 'RACE DAY', details: 'Val d\'Aran Ultra Trail -- 5000m D+', type: 'race' }
+        ]
+      }
+    ]
+  }
+];
+
+// ── Storage ──
+function getState() {
+  try { return JSON.parse(localStorage.getItem('vda-tracker') || '{}'); } catch { return {}; }
+}
+function setState(s) { localStorage.setItem('vda-tracker', JSON.stringify(s)); }
+function sessionKey(wn, si) { return `w${wn}_s${si}`; }
+
+// ── Countdown ──
+function updateCountdown() {
+  const now = new Date();
+  const diff = RACE_DATE - now;
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML = '<div class="countdown-unit"><div class="num">GO</div><div class="label">Race time!</div></div>';
+    return;
+  }
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('countdown').innerHTML = `
+    <div class="countdown-unit"><div class="num">${days}</div><div class="label">days</div></div>
+    <div class="countdown-unit"><div class="num">${hours}</div><div class="label">hours</div></div>
+    <div class="countdown-unit"><div class="num">${mins}</div><div class="label">min</div></div>
+  `;
+}
+
+// ── Confetti ──
+function spawnConfetti(x, y) {
+  const container = document.getElementById('confetti');
+  const colors = ['#00b894','#fdcb6e','#74b9ff','#a29bfe','#fd79a8','#e17055'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = (x + (Math.random()-0.5)*60) + 'px';
+    el.style.top = (y - 10) + 'px';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.width = (4 + Math.random()*6) + 'px';
+    el.style.height = (4 + Math.random()*6) + 'px';
+    const angle = (Math.random()-0.5) * 120;
+    const dist = 40 + Math.random()*80;
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.setProperty('--dx', Math.sin(angle*Math.PI/180)*dist + 'px');
+    el.style.animation = `confettiBurst 0.8s ease-out forwards`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+}
+// Add burst keyframes dynamically
+const burstStyle = document.createElement('style');
+burstStyle.textContent = `
+@keyframes confettiBurst {
+  0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, 30px), -80px) rotate(360deg) scale(0.2); }
+}`;
+document.head.appendChild(burstStyle);
+
+// ── Current week ──
+function isCurrentWeek(startStr, endStr) {
+  const now = new Date();
+  const s = new Date(startStr + 'T00:00:00');
+  const e = new Date(endStr + 'T23:59:59');
+  return now >= s && now <= e;
+}
+
+// ── Render ──
+function render() {
+  const state = getState();
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  let totalSessions = 0, doneSessions = 0;
+
+  phases.forEach(phase => {
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'phase';
+    phaseEl.innerHTML = `<div class="phase-header"><h2>${phase.name}</h2><span class="dates">${phase.dates}</span></div>`;
+
+    phase.weeks.forEach(week => {
+      const weekEl = document.createElement('div');
+      const isCurrent = isCurrentWeek(week.startDate, week.endDate);
+      weekEl.className = 'week' + (isCurrent ? ' current-week open' : '');
+
+      const actionable = week.sessions.filter(s => s.type !== 'rest' && s.type !== 'race');
+      const weekTotal = actionable.length;
+      let weekDone = 0;
+      actionable.forEach((s, i) => {
+        const realIdx = week.sessions.indexOf(s);
+        if (state[sessionKey(week.num, realIdx)]) weekDone++;
+      });
+      totalSessions += weekTotal;
+      doneSessions += weekDone;
+      const weekPct = weekTotal ? Math.round(weekDone / weekTotal * 100) : 0;
+
+      const headerHTML = `
+        <div class="week-header" onclick="toggleWeek(this)">
+          <div>
+            <span class="week-title">${week.title}</span>
+            ${isCurrent ? ' <span class="current-badge">Current</span>' : ''}
+          </div>
+          <div class="week-meta">
+            ${week.target ? `<div class="week-summary-stats"><span>${week.target}</span></div>` : ''}
+            <span>${weekDone}/${weekTotal}</span>
+            <div class="week-progress-mini"><div class="fill" style="width:${weekPct}%"></div></div>
+          </div>
+        </div>`;
+
+      let bodyHTML = '<div class="week-body">';
+
+      const msgs = [
+        'Week crushed! You are unstoppable.',
+        'All sessions done. Machine mode activated.',
+        'Perfect week. The mountain awaits.',
+        'Full send. Nothing can stop you.',
+        'Every session counts. You nailed them all.'
+      ];
+      const msg = msgs[week.num % msgs.length];
+      bodyHTML += `<div class="week-complete-msg ${weekPct === 100 && weekTotal > 0 ? 'visible' : ''}">${msg}</div>`;
+
+      week.sessions.forEach((s, si) => {
+        const key = sessionKey(week.num, si);
+        const isDone = !!state[key];
+        const isRest = s.type === 'rest';
+        const isRace = s.type === 'race';
+
+        bodyHTML += `<div class="session type-${s.type} ${isDone ? 'completed' : ''} ${isRest ? 'rest-day' : ''}" data-key="${key}">
+          <div class="session-check">
+            ${!isRest && !isRace ? `<input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleSession('${key}', this)">` : ''}
+          </div>
+          <div class="session-info">
+            <div class="session-date">${s.date}</div>
+            <div class="session-time">${s.time || (isRest ? 'REST' : '')}</div>
+            <div class="session-name"><span class="type-indicator"></span>${s.name}</div>
+            ${s.details ? `<div class="session-details">${s.details}</div>` : ''}
+          </div>
+        </div>`;
+      });
+
+      bodyHTML += '</div>';
+      weekEl.innerHTML = headerHTML + bodyHTML;
+      phaseEl.appendChild(weekEl);
+    });
+
+    app.appendChild(phaseEl);
+  });
+
+  // Overall progress
+  const overallPct = totalSessions ? Math.round(doneSessions / totalSessions * 100) : 0;
+  document.getElementById('overall-fill').style.width = overallPct + '%';
+  document.getElementById('overall-label').textContent = `${doneSessions} / ${totalSessions} sessions (${overallPct}%)`;
+}
+
+function toggleWeek(header) {
+  header.closest('.week').classList.toggle('open');
+}
+
+function toggleSession(key, checkbox) {
+  const state = getState();
+  state[key] = checkbox.checked;
+  setState(state);
+
+  const sessionEl = checkbox.closest('.session');
+  if (checkbox.checked) {
+    sessionEl.classList.add('completed');
+    const rect = checkbox.getBoundingClientRect();
+    spawnConfetti(rect.left + rect.width/2, rect.top);
+  } else {
+    sessionEl.classList.remove('completed');
+  }
+
+  // Re-render to update progress bars
+  render();
+}
+
+// ── Init ──
+updateCountdown();
+setInterval(updateCountdown, 60000);
+render();
+</script>
+</body>
+</html>
