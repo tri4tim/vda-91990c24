@@ -454,6 +454,170 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Cumulative stats strip ── */
+.stats-strip {
+  margin: 0 auto 4px;
+  max-width: 960px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stat-bar-block { display: flex; flex-direction: column; gap: 4px; }
+.stat-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+.stat-bar-label .actual { color: var(--text); font-weight: 600; }
+.stat-bar-label .planned { color: var(--text-muted); }
+.stat-bar-outer {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.stat-bar-inner {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.stat-bar-inner.km   { background: linear-gradient(90deg, #00b894, #55efc4); }
+.stat-bar-inner.vert { background: linear-gradient(90deg, #6c5ce7, #a29bfe); }
+.stat-bar-inner.hrs  { background: linear-gradient(90deg, #74b9ff, #a29bfe); }
+
+/* ── Log stats button & actuals in week header ── */
+.log-stats-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.log-stats-btn:hover { border-color: var(--accent); color: var(--accent); }
+.log-stats-btn.logged { border-color: var(--green); color: var(--green); }
+.week-actuals {
+  font-size: 0.68rem;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.actual-val {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.actual-val.over  { color: var(--green); }
+.actual-val.under { color: var(--orange); }
+.actual-val .chk  { font-size: 0.6rem; }
+
+/* ── Stats modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.modal h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.modal .modal-week { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; }
+.modal-fields { display: flex; flex-direction: column; gap: 14px; }
+.modal-field label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+.modal-field input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.modal-field input:focus { border-color: var(--accent); }
+.modal-hint { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+.btn-save {
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: opacity 0.2s;
+}
+.btn-save:hover { opacity: 0.85; }
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+.btn-clear {
+  background: none;
+  border: none;
+  color: var(--gray);
+  font-family: inherit;
+  font-size: 0.65rem;
+  cursor: pointer;
+  margin-right: auto;
+  padding: 0;
+  text-decoration: underline;
+}
+.btn-clear:hover { color: var(--red); }
 </style>
 </head>
 <body>
@@ -489,6 +653,8 @@ body {
   <div class="progress-bar"><div class="fill" id="overall-fill" style="width:0%"></div></div>
 </div>
 
+<div class="stats-strip" id="stats-strip"></div>
+
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Easy / Yoga</div>
   <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Track</div>
@@ -510,6 +676,36 @@ body {
 <div class="footer">Val d'Aran Ultra Trail Training Tracker / Built with grit</div>
 
 <div class="confetti-container" id="confetti"></div>
+
+<!-- Stats modal -->
+<div class="modal-overlay" id="stats-modal" style="display:none" onclick="handleModalOverlayClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Log Week Stats</h3>
+    <div class="modal-week" id="modal-week-label"></div>
+    <div class="modal-fields">
+      <div class="modal-field">
+        <label>Distance (km)</label>
+        <input type="number" id="input-km" min="0" step="0.1" placeholder="e.g. 72">
+        <div class="modal-hint">Total km run this week</div>
+      </div>
+      <div class="modal-field">
+        <label>Training time (hours)</label>
+        <input type="number" id="input-hrs" min="0" step="0.1" placeholder="e.g. 8.5">
+        <div class="modal-hint">Total hours of training (all sessions)</div>
+      </div>
+      <div class="modal-field">
+        <label>Elevation gain (m D+)</label>
+        <input type="number" id="input-vert" min="0" step="10" placeholder="e.g. 980">
+        <div class="modal-hint">Total meters climbed this week</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-clear" onclick="clearWeekStats()">Clear</button>
+      <button class="btn-cancel" onclick="closeStatsModal()">Cancel</button>
+      <button class="btn-save" onclick="saveWeekStats()">Save</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const RACE_DATE = new Date('2026-07-01T06:00:00');
@@ -715,6 +911,117 @@ function getState() {
 function setState(s) { localStorage.setItem('vda-tracker', JSON.stringify(s)); }
 function sessionKey(wn, si) { return `w${wn}_s${si}`; }
 
+// ── Week stats storage ──
+function getAllWeekStats() {
+  try { return JSON.parse(localStorage.getItem('vda-week-stats') || '{}'); } catch { return {}; }
+}
+function getWeekStats(weekNum) { return getAllWeekStats()[`w${weekNum}`] || null; }
+function setWeekStats(weekNum, data) {
+  const all = getAllWeekStats();
+  all[`w${weekNum}`] = data;
+  localStorage.setItem('vda-week-stats', JSON.stringify(all));
+}
+function deleteWeekStats(weekNum) {
+  const all = getAllWeekStats();
+  delete all[`w${weekNum}`];
+  localStorage.setItem('vda-week-stats', JSON.stringify(all));
+}
+
+// ── Parse target string ── e.g. "70km / 1000m D+ / ~8h"
+function parseTarget(target) {
+  if (!target) return null;
+  const km   = parseFloat((target.match(/(\d+\.?\d*)km/) || [])[1]) || 0;
+  const vert = parseFloat((target.match(/(\d+\.?\d*)m D\+/) || [])[1]) || 0;
+  const hrs  = parseFloat((target.match(/~?(\d+\.?\d*)h/) || [])[1]) || 0;
+  return { km, vert, hrs };
+}
+
+// ── Modal state ──
+let _modalWeekNum = null;
+
+function openStatsModal(weekNum, weekTitle) {
+  _modalWeekNum = weekNum;
+  document.getElementById('modal-week-label').textContent = weekTitle;
+  const existing = getWeekStats(weekNum);
+  document.getElementById('input-km').value   = existing ? existing.km   : '';
+  document.getElementById('input-hrs').value  = existing ? existing.hrs  : '';
+  document.getElementById('input-vert').value = existing ? existing.vert : '';
+  document.getElementById('stats-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('input-km').focus(), 100);
+}
+
+function closeStatsModal() {
+  document.getElementById('stats-modal').style.display = 'none';
+  _modalWeekNum = null;
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('stats-modal')) closeStatsModal();
+}
+
+function saveWeekStats() {
+  const km   = parseFloat(document.getElementById('input-km').value);
+  const hrs  = parseFloat(document.getElementById('input-hrs').value);
+  const vert = parseFloat(document.getElementById('input-vert').value);
+  if (isNaN(km) && isNaN(hrs) && isNaN(vert)) { closeStatsModal(); return; }
+  setWeekStats(_modalWeekNum, {
+    km:   isNaN(km)   ? 0 : km,
+    hrs:  isNaN(hrs)  ? 0 : hrs,
+    vert: isNaN(vert) ? 0 : vert
+  });
+  closeStatsModal();
+  render();
+}
+
+function clearWeekStats() {
+  if (_modalWeekNum) deleteWeekStats(_modalWeekNum);
+  closeStatsModal();
+  render();
+}
+
+// ── Cumulative stats strip ──
+function renderStatsStrip() {
+  let totalKm = 0, totalVert = 0, totalHrs = 0;
+  let actualKm = 0, actualVert = 0, actualHrs = 0;
+
+  phases.forEach(phase => {
+    phase.weeks.forEach(week => {
+      const t = parseTarget(week.target);
+      if (t) { totalKm += t.km; totalVert += t.vert; totalHrs += t.hrs; }
+      const s = getWeekStats(week.num);
+      if (s) { actualKm += s.km; actualVert += s.vert; actualHrs += s.hrs; }
+    });
+  });
+
+  const pctKm   = totalKm   ? Math.min(100, Math.round(actualKm   / totalKm   * 100)) : 0;
+  const pctVert = totalVert ? Math.min(100, Math.round(actualVert / totalVert * 100)) : 0;
+  const pctHrs  = totalHrs  ? Math.min(100, Math.round(actualHrs  / totalHrs  * 100)) : 0;
+
+  document.getElementById('stats-strip').innerHTML = `
+    <div class="stat-bar-block">
+      <div class="stat-bar-label">
+        <span>🏃 Distance</span>
+        <span><span class="actual">${actualKm > 0 ? actualKm.toFixed(0)+'km' : '—'}</span> <span class="planned">/ ${totalKm}km planned</span></span>
+      </div>
+      <div class="stat-bar-outer"><div class="stat-bar-inner km" style="width:${pctKm}%"></div></div>
+    </div>
+    <div class="stat-bar-block">
+      <div class="stat-bar-label">
+        <span>⛰️ Elevation</span>
+        <span><span class="actual">${actualVert > 0 ? actualVert.toFixed(0)+'m D+' : '—'}</span> <span class="planned">/ ${totalVert}m planned</span></span>
+      </div>
+      <div class="stat-bar-outer"><div class="stat-bar-inner vert" style="width:${pctVert}%"></div></div>
+    </div>
+    <div class="stat-bar-block">
+      <div class="stat-bar-label">
+        <span>⏱️ Time</span>
+        <span><span class="actual">${actualHrs > 0 ? actualHrs.toFixed(1)+'h' : '—'}</span> <span class="planned">/ ${totalHrs}h planned</span></span>
+      </div>
+      <div class="stat-bar-outer"><div class="stat-bar-inner hrs" style="width:${pctHrs}%"></div></div>
+    </div>
+  `;
+}
+
 // ── Countdown ──
 function updateCountdown() {
   const now = new Date();
@@ -801,14 +1108,38 @@ function render() {
       doneSessions += weekDone;
       const weekPct = weekTotal ? Math.round(weekDone / weekTotal * 100) : 0;
 
+      const weekStats = getWeekStats(week.num);
+      const target    = parseTarget(week.target);
+      const hasStats  = !!weekStats;
+
+      // Build actuals display
+      let actualsHTML = '';
+      if (hasStats && target) {
+        const fmtVal = (actual, planned, unit, decimals=0) => {
+          const over = actual >= planned * 0.95;
+          const cls  = over ? 'over' : 'under';
+          const chk  = over ? '✓' : '↓';
+          return `<span class="actual-val ${cls}">${actual.toFixed(decimals)}${unit} <span class="chk">${chk}</span></span>`;
+        };
+        actualsHTML = `<div class="week-actuals">
+          ${fmtVal(weekStats.km, target.km, 'km')}
+          ${fmtVal(weekStats.vert, target.vert, 'm D+')}
+          ${fmtVal(weekStats.hrs, target.hrs, 'h', 1)}
+        </div>`;
+      }
+
       const headerHTML = `
         <div class="week-header" onclick="toggleWeek(this)">
-          <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span class="week-title">${week.title}</span>
             ${isCurrent ? ' <span class="current-badge">Current</span>' : ''}
+            ${actualsHTML}
           </div>
           <div class="week-meta">
-            ${week.target ? `<div class="week-summary-stats"><span>${week.target}</span></div>` : ''}
+            ${week.target && !hasStats ? `<div class="week-summary-stats"><span>${week.target}</span></div>` : ''}
+            <button class="log-stats-btn ${hasStats ? 'logged' : ''}" onclick="event.stopPropagation(); openStatsModal(${week.num}, '${week.title.replace(/'/g, "\\'")}')">
+              ${hasStats ? '✎ edit stats' : '+ log stats'}
+            </button>
             <span>${weekDone}/${weekTotal}</span>
             <div class="week-progress-mini"><div class="fill" style="width:${weekPct}%"></div></div>
           </div>
@@ -857,6 +1188,9 @@ function render() {
   const overallPct = totalSessions ? Math.round(doneSessions / totalSessions * 100) : 0;
   document.getElementById('overall-fill').style.width = overallPct + '%';
   document.getElementById('overall-label').textContent = `${doneSessions} / ${totalSessions} sessions (${overallPct}%)`;
+
+  // Stats strip
+  renderStatsStrip();
 }
 
 function toggleWeek(header) {
