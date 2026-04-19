@@ -689,9 +689,14 @@ body {
         <div class="modal-hint">Total km run this week</div>
       </div>
       <div class="modal-field">
-        <label>Training time (hours)</label>
-        <input type="number" id="input-hrs" min="0" step="0.1" placeholder="e.g. 8.5">
-        <div class="modal-hint">Total hours of training (all sessions)</div>
+        <label>Training time</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="number" id="input-hrs" min="0" max="99" step="1" placeholder="8" style="width:50%">
+          <span style="color:var(--text-muted);font-size:0.8rem;">h</span>
+          <input type="number" id="input-mins" min="0" max="59" step="1" placeholder="30" style="width:50%">
+          <span style="color:var(--text-muted);font-size:0.8rem;">min</span>
+        </div>
+        <div class="modal-hint">Total training time this week</div>
       </div>
       <div class="modal-field">
         <label>Elevation gain (m D+)</label>
@@ -927,6 +932,15 @@ function deleteWeekStats(weekNum) {
   localStorage.setItem('vda-week-stats', JSON.stringify(all));
 }
 
+// ── Format decimal hours as "Xh Ymin" ──
+function fmtHrs(decimalHrs) {
+  const h = Math.floor(decimalHrs);
+  const m = Math.round((decimalHrs - h) * 60);
+  if (m === 0) return `${h}h`;
+  if (h === 0) return `${m}min`;
+  return `${h}h ${m}min`;
+}
+
 // ── Parse target string ── e.g. "70km / 1000m D+ / ~8h"
 function parseTarget(target) {
   if (!target) return null;
@@ -944,7 +958,8 @@ function openStatsModal(weekNum, weekTitle) {
   document.getElementById('modal-week-label').textContent = weekTitle;
   const existing = getWeekStats(weekNum);
   document.getElementById('input-km').value   = existing ? existing.km   : '';
-  document.getElementById('input-hrs').value  = existing ? existing.hrs  : '';
+  document.getElementById('input-hrs').value  = existing ? Math.floor(existing.hrs) : '';
+  document.getElementById('input-mins').value = existing ? Math.round((existing.hrs % 1) * 60) : '';
   document.getElementById('input-vert').value = existing ? existing.vert : '';
   document.getElementById('stats-modal').style.display = 'flex';
   setTimeout(() => document.getElementById('input-km').focus(), 100);
@@ -961,12 +976,14 @@ function handleModalOverlayClick(e) {
 
 function saveWeekStats() {
   const km   = parseFloat(document.getElementById('input-km').value);
-  const hrs  = parseFloat(document.getElementById('input-hrs').value);
+  const h    = parseFloat(document.getElementById('input-hrs').value) || 0;
+  const m    = parseFloat(document.getElementById('input-mins').value) || 0;
+  const hrs  = h + m / 60;
   const vert = parseFloat(document.getElementById('input-vert').value);
-  if (isNaN(km) && isNaN(hrs) && isNaN(vert)) { closeStatsModal(); return; }
+  if (isNaN(km) && (h === 0 && m === 0) && isNaN(vert)) { closeStatsModal(); return; }
   setWeekStats(_modalWeekNum, {
     km:   isNaN(km)   ? 0 : km,
-    hrs:  isNaN(hrs)  ? 0 : hrs,
+    hrs:  hrs,
     vert: isNaN(vert) ? 0 : vert
   });
   closeStatsModal();
@@ -1015,7 +1032,7 @@ function renderStatsStrip() {
     <div class="stat-bar-block">
       <div class="stat-bar-label">
         <span>⏱️ Time</span>
-        <span><span class="actual">${actualHrs > 0 ? actualHrs.toFixed(1)+'h' : '—'}</span> <span class="planned">/ ${totalHrs}h planned</span></span>
+        <span><span class="actual">${actualHrs > 0 ? fmtHrs(actualHrs) : '—'}</span> <span class="planned">/ ${fmtHrs(totalHrs)} planned</span></span>
       </div>
       <div class="stat-bar-outer"><div class="stat-bar-inner hrs" style="width:${pctHrs}%"></div></div>
     </div>
@@ -1124,7 +1141,12 @@ function render() {
         actualsHTML = `<div class="week-actuals">
           ${fmtVal(weekStats.km, target.km, 'km')}
           ${fmtVal(weekStats.vert, target.vert, 'm D+')}
-          ${fmtVal(weekStats.hrs, target.hrs, 'h', 1)}
+          ${(() => {
+            const over = weekStats.hrs >= target.hrs * 0.95;
+            const cls = over ? 'over' : 'under';
+            const chk = over ? '✓' : '↓';
+            return `<span class="actual-val ${cls}">${fmtHrs(weekStats.hrs)} <span class="chk">${chk}</span></span>`;
+          })()}
         </div>`;
       }
 
