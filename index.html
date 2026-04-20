@@ -732,35 +732,36 @@ const phases = [
           { date: 'Wed Apr 15', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team. Good VO2max stimulus.', type: 'track' },
           { date: 'Thu Apr 16', time: '', name: 'REST', details: 'Recovery day', type: 'rest' },
           { date: 'Fri Apr 17', time: '12:00-13:00', name: 'Lunch run', details: '8km easy', type: 'easy' },
-          { date: 'Fri Apr 17', time: '19:00-22:30', name: 'Gravel ride — group event (80km)', details: '~45km fast group ride then home. Replaces Strength B this week. Keep 12:00 lunch run easy.', type: 'long' },
-          { date: 'Sat Apr 18', time: '09:00-16:00', name: 'Bikepacking — long endurance ride (~150km)', details: 'Endurance pace throughout. Fueling practice. Cap at ~150km. Compensate downhill eccentric work in Week 2.', type: 'long' },
-          { date: 'Sun Apr 19', time: '09:00-09:45', name: 'Easy recovery spin or rest', details: '30-45min easy spin max, or full rest if legs are heavy. Week 2 starts tomorrow.', type: 'easy' }
+          { date: 'Fri Apr 17', time: '17:30-19:00', name: 'Gym: Strength B + treadmill', details: '30min strength (lunges, step-ups, core) + 30min treadmill 15% incline power hike', type: 'gym' },
+          { date: 'Sat Apr 18', time: '09:00-11:15', name: 'Long run — vert focus', details: '2h15, include 45min treadmill incline or parking garage repeats', type: 'long' },
+          { date: 'Sun Apr 19', time: '09:00-10:00', name: 'Easy run', details: '60min recovery pace, flat', type: 'easy' }
         ]
       },
       {
         num: 2, title: 'Week 2: Apr 20-26', target: '75km / 1200m D+ / ~9h',
         startDate: '2026-04-20', endDate: '2026-04-26',
         sessions: [
-          { date: 'Mon Apr 20', time: '17:00-18:00', name: 'Easy run + stair descents', details: '10km easy + finish with 15x stair descent repeats. Controlled descent, focus on quad loading. Downhill compensation for bikepacking weekend.', type: 'easy' },
+          { date: 'Mon Apr 20', time: '17:00-18:00', name: 'Easy run', details: '10km easy, evening', type: 'easy' },
           { date: 'Tue Apr 21', time: '16:30-18:15', name: 'Gym: Strength A + treadmill incline', details: '40min strength + 30min treadmill at 12-15% moderate-hard effort', type: 'gym' },
           { date: 'Wed Apr 22', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
           { date: 'Thu Apr 23', time: '12:15-13:00', name: 'Yoga', details: 'Active recovery', type: 'yoga' },
           { date: 'Thu Apr 23', time: '', name: 'REST from running', details: 'Karaoke evening', type: 'rest' },
-          { date: 'Fri Apr 24', time: '09:30-12:00', name: 'Big training day (Day off)', details: 'Uphill treadmill intervals (6x8min at 15%) + Strength B + stairmaster. ADD: 20min stair descent repeats (20x, 4-sec lowering) on pre-fatigued legs — key downhill compensation session.', type: 'gym' },
-          { date: 'Sat Apr 25', time: '09:00-11:30', name: 'Long run — vert + downhill focus', details: '2h30. Structure: 30min easy warmup → 45min treadmill incline → 30min slope/ramp descents → 15min stair descent repeats (20x min). Key session: makes up for downhill work missed during bikepacking weekend.', type: 'long' },
-          { date: 'Sun Apr 26', time: '09:00-10:00', name: 'Easy run', details: '60min recovery', type: 'easy' }
+          { date: 'Fri Apr 24', time: '09:30-12:00', name: 'Big training day (Day off)', details: 'Uphill treadmill intervals (6x8min at 15%) + Strength B + stairmaster cooldown.', type: 'gym' },
+          { date: 'Fri Apr 24', time: '19:00-22:30', name: 'Gravel ride — group event (80km)', details: '~45km fast group ride then home. Evening session after morning training.', type: 'long' },
+          { date: 'Sat Apr 25', time: '09:00-16:00', name: 'Bikepacking — long endurance ride (~150km)', details: 'Endurance pace throughout. Fueling practice. Cap at ~150km. Compensate downhill eccentric work in Week 3.', type: 'long' },
+          { date: 'Sun Apr 26', time: '09:00-09:45', name: 'Easy recovery spin or rest', details: '30-45min easy spin max, or full rest if legs are heavy. Week 3 starts tomorrow.', type: 'easy' }
         ]
       },
       {
         num: 3, title: 'Week 3: Apr 27 - May 3', target: '80km / 1400m D+ / ~9.5h',
         startDate: '2026-04-27', endDate: '2026-05-03',
         sessions: [
-          { date: 'Mon Apr 27', time: '11:00-12:00', name: 'Lunch run', details: '10km easy (wide open 11:00-13:00)', type: 'easy' },
+          { date: 'Mon Apr 27', time: '11:00-12:00', name: 'Lunch run + stair descents', details: '10km easy + finish with 15x stair descent repeats. Controlled descent, focus on quad loading. Downhill compensation for bikepacking weekend.', type: 'easy' },
           { date: 'Tue Apr 28', time: '17:30-19:00', name: 'Gym: Strength A + treadmill', details: '40min strength (eccentric emphasis: slow step-downs, tempo squats) + 25min treadmill 15%', type: 'gym' },
           { date: 'Wed Apr 29', time: '18:30-20:00', name: 'Track session', details: 'Intervals with team', type: 'track' },
           { date: 'Thu Apr 30', time: '11:00-12:30', name: 'Midday run + stairmaster', details: '40min easy run + 30min stairmaster (big open window 11:00-16:00)', type: 'easy' },
-          { date: 'Fri May 1', time: '09:00-12:00', name: 'Big vert session (Holiday)', details: 'Uphill intervals (5x8min at 15%, practice power-hiking) + Strength B + stairmaster', type: 'gym' },
-          { date: 'Sat May 2', time: '09:00-11:45', name: 'Long run', details: '2h45, include 70min sustained incline block', type: 'long' },
+          { date: 'Fri May 1', time: '09:00-12:00', name: 'Big vert + downhill session (Holiday)', details: 'Uphill intervals (5x8min at 15%, practice power-hiking) + Strength B + stairmaster. ADD: 20min stair descent repeats (20x, 4-sec lowering) on pre-fatigued legs — key downhill compensation session.', type: 'gym' },
+          { date: 'Sat May 2', time: '09:00-11:45', name: 'Long run — vert + downhill focus', details: '2h45. Structure: 30min easy warmup → 50min treadmill incline → 35min slope/ramp descents → 15min stair descent repeats (20x min). Key session: makes up for downhill work missed during bikepacking weekend.', type: 'long' },
           { date: 'Sun May 3', time: '09:00-10:10', name: 'Easy run or bike', details: '70min recovery', type: 'easy' }
         ]
       }
